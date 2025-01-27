@@ -6,5 +6,6 @@ export interface Data {
 export interface Messages {
   author: string;
   message: string;
-  id: string;
+  _id: string;
+  datetime: string;
 }
