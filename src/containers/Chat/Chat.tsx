@@ -25,36 +25,40 @@ const formatDate = (date: string): string => {
 
 const Chat = () => {
   const [userMessages, setUserMessages] = useState<Messages[]>([]);
-  const [lastDateTimeOfMessage, setLastDateTimeOfMessage] = useState<string | null>(null)
+  const [lastDateTimeOfMessage, setLastDateTimeOfMessage] = useState<string>('')
 
   useEffect(() => {
     const fetchData = async () => {
-      const fetchUrl = lastDateTimeOfMessage ?
-        `http://146.185.154.90:8000/messages?datetime=${lastDateTimeOfMessage}` : url
+      try {
+        const fetchUrl = lastDateTimeOfMessage ?
+          `http://146.185.154.90:8000/messages?datetime=${lastDateTimeOfMessage}` : url
 
-      const response = await fetch(fetchUrl);
-      if (response.ok) {
-        const posts = await response.json() as Messages[];
-        console.log('posts', posts);
-        if (posts.length > 0) {
-          const responseMessages = posts.map(post => {
-            return {
-              _id: post._id,
-              author: post.author,
-              message: post.message,
-              datetime: formatDate(post.datetime)
-            };
-          });
-          responseMessages.reverse();
-          setLastDateTimeOfMessage(posts[posts.length - 1].datetime);
-          setUserMessages(prevState => [...responseMessages, ...prevState]);
+        const response = await fetch(fetchUrl);
+        if (response.ok) {
+          const posts = await response.json() as Messages[];
+          if (posts.length > 0) {
+            const responseMessages = posts.map(post => {
+              return {
+                _id: post._id,
+                author: post.author,
+                message: post.message,
+                datetime: formatDate(post.datetime)
+              };
+            });
+            responseMessages.reverse();
+            setLastDateTimeOfMessage(posts[posts.length - 1].datetime);
+            setUserMessages(prevState => [...responseMessages, ...prevState]);
+          }
         }
+      } catch (e) {
+        console.error("Error", e);
       }
     };
-    void fetchData();
+
+    void fetchData()
 
     const interval = setInterval(async () => {
-      void fetchData();
+      void fetchData()
     }, 3000);
     return () => clearInterval(interval);
   }, [lastDateTimeOfMessage]);
